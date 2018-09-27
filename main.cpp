@@ -13,8 +13,14 @@ using namespace std;
 
 struct Token
 {
-  string name;
-  // TODO
+  string lexemeName;
+  string token;
+  int line;
+  int linePosition;
+
+  void out(){
+    cout << lexemeName << " " << token << " " << line << " " << linePosition << endl;
+  }
 };
 
 struct BNF
@@ -24,7 +30,7 @@ struct BNF
 };
 
 // Prototypes
-vector<Token> Lexer(string expression);
+vector<Token> Lexer(string expression, int line);
 
 int main(int argc, char *argv[])
 {
@@ -37,7 +43,7 @@ int main(int argc, char *argv[])
   // Reading the data from the user
   cout<<"Please enter the name of the file: ";
   getline(cin, fileName);
- 
+  
   infile.open(fileName.c_str());
 
   if(infile.fail())
@@ -45,26 +51,37 @@ int main(int argc, char *argv[])
       cout<<"** ERROR - the file ""<<fileName<<"" cannot be found!\n";
       exit(1);
     }
- 
+  int line = 1;
   // use a loop to scan each line in the file
+
+  map<size_t, Token> SymbolTable;
+  size_t index = 0;
   while(getline(infile, expression))
     {
-      tokens = Lexer(expression);
-      
+      tokens = Lexer(expression, line);
+      line++;
       // display the tokens to the screen
       for(unsigned x = 0; x < tokens.size(); ++x)
         {
-      	  cout<<tokens[x].lexemeName<<"  t"
-      	      <<tokens[x].token<<endl;
+	  tokens[x].linePosition = expression.find(tokens[x].token);
+	  SymbolTable[index] = tokens[x];
+	  index++;
         }
     }
  
   infile.close();
+
+  // Printing the Symbol Table
+
+  cout << "----------Symbol Table------------" <<  SymbolTable.size() << endl; 
+  for(auto row = SymbolTable.begin(); row != SymbolTable.end(); ++row){
+    row->second.out();
+  }
   
   return 0;
 }
 
-vector<Token> Lexer(string expression)
+vector<Token> Lexer(string expression, int line)
 {
     vector<Token> tokens;
 
@@ -75,8 +92,8 @@ vector<Token> Lexer(string expression)
 	{"\\bif\\b|\\belse\\b|\\bFalse\\b|\\bNone\\b|\\band\\b|\\bor\\b|\\bfor\\b|\\bin\\b",   "RESERVED WORD"},
 	  { "\".*\"" ,   "STRING" },
 	    { "([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*" ,   "IDENTIFIER" },
-	      { "[0-9]+" ,   "NUMBER" },
-		{ "\\*|\\+|==|=|-",  "OPERATOR" }
+		{ "[0-9]+" ,   "NUMBER" },
+		  { "\\*|\\+|==|=|-",  "OPERATOR" }
     };
 
     // storage for results
@@ -104,9 +121,15 @@ vector<Token> Lexer(string expression)
 	}
       }
 
-    for(auto match = matches.begin(); match != matches.end(); ++match)
+    for(auto match = matches.begin(); match != matches.end(); ++match){
       cout<< "<" << match->second.first << ", " << match->second.second << "> ";
-    
+      Token foundT = Token();
+      foundT.lexemeName = match->second.second;
+      foundT.token = match->second.first;
+      foundT.line = line;
+      tokens.push_back(foundT);
+    }
+          
     expression = regex_replace(expression, regex("^ +| +$|( ) +"), "$1");
     if(expression.size())
       {
