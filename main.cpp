@@ -14,6 +14,8 @@ using namespace std;
 struct Token
 {
   string name;
+	string lexemeName;
+	string token;
   // TODO
 };
 
@@ -72,11 +74,16 @@ vector<Token> Lexer(string expression)
     vector<BNF> patterns
     {
       { "#.*" ,   "COMMENT" },
-	{"\\bif\\b|\\belse\\b|\\bFalse\\b|\\bNone\\b|\\band\\b|\\bor\\b|\\bfor\\b|\\bin\\b",   "RESERVED WORD"},
-	  { "\".*\"" ,   "STRING" },
+	{"\\bprint\\b|\\bif\\b|\\belse\\b|\\bFalse\\b|\\bNone\\b|\\band\\b|\\bor\\b|\\bfor\\b|\\bin\\b",   "RESERVED WORD"},
+	  { "\".*\"|\'.*\'" ,   "STRING" },
 	    { "([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*" ,   "IDENTIFIER" },
 	      { "[0-9]+" ,   "NUMBER" },
-		{ "\\*|\\+|==|=|-",  "OPERATOR" }
+		{ "\\*|\\+|==|=|-",  "OPERATOR" },
+			{"\\(|\\{", "START_GROUP"},
+			{"\\)|\\}", "END_GROUP"},
+			{"\\:", "BLOCK_START"},
+			{"\t", "TAB"}
+
     };
 
     // storage for results
