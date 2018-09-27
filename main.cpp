@@ -87,8 +87,8 @@ vector<Token> Lexer(string expression, int line)
 
     // Defining regular expressions. RegEx in C++: http://www.informit.com/articles/article.aspx?p=2064649&seqNum=3
     vector<BNF> patterns
-    {
-      { "#.*" ,   "COMMENT" },
+    {	{ "#.*" ,   "COMMENT" },
+	{"(\\s\\s\\s\\s){1}", "TAB"},
 	{"\\bprint\\b|\\bif\\b|\\belse\\b|\\bFalse\\b|\\bNone\\b|\\band\\b|\\bor\\b|\\bfor\\b|\\bin\\b",   "RESERVED WORD"},
 	  { "\".*\"|\'.*\'" ,   "STRING" },
 	    { "([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*" ,   "IDENTIFIER" },
@@ -96,10 +96,24 @@ vector<Token> Lexer(string expression, int line)
 		{ "\\*|\\+|==|=|-",  "OPERATOR" },
 			{"\\(|\\{", "START_GROUP"},
 			{"\\)|\\}", "END_GROUP"},
-			{"\\:", "BLOCK_START"},
-			{"\t", "TAB"}
+			{"\\:", "BLOCK_START"}
     };
-
+	cout << "CAMBIOS \n";
+	while(true){
+		auto position = expression.find('\t');
+		if(position == 0){
+			Token token = Token();
+			token.lexemeName = "TAB";
+			token.token = "\t";
+			token.line = line;
+			expression.replace(0,1,"");
+			tokens.push_back(token);
+		}
+		else{
+			break;
+		}
+	}
+	
     // storage for results
     map< size_t, pair<string,string> > matches;
     size_t index = 0;

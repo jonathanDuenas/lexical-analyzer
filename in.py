@@ -4,6 +4,7 @@ if x == 1:
 	# indented four spaces
 	print('x is 1.')
 	print('lol')
+        	# idented eight spaces
 
 for i in range(10):
 	print(i)
