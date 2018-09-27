@@ -88,7 +88,6 @@ vector<Token> Lexer(string expression, int line)
     // Defining regular expressions. RegEx in C++: http://www.informit.com/articles/article.aspx?p=2064649&seqNum=3
     vector<BNF> patterns
     {	{ "#.*" ,   "COMMENT" },
-	{"(\\s\\s\\s\\s){1}", "TAB"},
 	{"\\bprint\\b|\\bif\\b|\\belse\\b|\\bFalse\\b|\\bNone\\b|\\band\\b|\\bor\\b|\\bfor\\b|\\bin\\b",   "RESERVED WORD"},
 	  { "\".*\"|\'.*\'" ,   "STRING" },
 	    { "([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*" ,   "IDENTIFIER" },
@@ -98,26 +97,39 @@ vector<Token> Lexer(string expression, int line)
 			{"\\)|\\}", "END_GROUP"},
 			{"\\:", "BLOCK_START"}
     };
-	cout << "CAMBIOS \n";
-	while(true){
-		auto position = expression.find('\t');
-		if(position == 0){
-			Token token = Token();
-			token.lexemeName = "TAB";
-			token.token = "\t";
-			token.line = line;
-			expression.replace(0,1,"");
-			tokens.push_back(token);
-		}
-		else{
-			break;
-		}
+    cout << expression << endl;
+    while(true){
+      int tab = 1;
+      auto position = expression.find('\t');
+      if(position != 0){
+	position = expression.find("    ");
+	tab = 0;
+      }
+      
+      if(position == 0){
+	Token token = Token();
+	token.lexemeName = "TAB";
+	token.line = line;
+	if(tab){
+	  expression.replace(0,1,"");
+	  token.token = "\t";
+	}	
+	else{
+	  expression.replace(0,4,"");
+	  token.token = "    ";
 	}
-	
+	cout << "<\t, TAB> ";  
+	tokens.push_back(token);
+      }
+      else{
+	break;
+      }
+    }
+    
     // storage for results
     map< size_t, pair<string,string> > matches;
     size_t index = 0;
-    cout << expression << endl;
+
     for(auto pat = patterns.begin(); pat != patterns.end(); ++pat)
       {
 	regex r(pat->pattern);
